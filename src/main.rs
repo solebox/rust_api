@@ -1,4 +1,6 @@
 extern crate hyper;
+extern crate rustc_serialize;
+use rustc_serialize::json;
 use hyper::buffer::BufReader;
 use hyper::header::{Host, TransferEncoding, Encoding};
 use hyper::net::NetworkStream;
@@ -6,6 +8,11 @@ use std::io::{self,Read, Write};
 use hyper::server::{Server, Request, Response};
 use hyper::status::StatusCode;
 
+#[derive(RustcDecodable, RustcEncodable)]
+struct TestStruct {
+    token: String,
+    pass: String
+}
 fn main() {
 
     Server::http("0.0.0.0:8000").unwrap().handle(|mut req: Request, mut res: Response| {
@@ -24,11 +31,13 @@ fn main() {
                 result.push_str(&my_remote);
                 
                 // body handling
-                let mut line = String::new();
-                let len = req.read_to_string(&mut line);
+                let mut my_body = String::new();
+                let len = req.read_to_string(&mut my_body);
 
-                let my_body = format!("{}\n", line);
-                result.push_str(&line);
+                let decoded_body: TestStruct = json::decode(&my_body).unwrap();
+                result.push_str(&my_body);
+                let my_decoded_body = format!("\n{}", decoded_body.token);
+                result.push_str(&my_decoded_body);
 
                 write!(&mut res.start().unwrap(),"{}",&result).unwrap();
                 //io::copy(&mut req, &mut res.start().unwrap()).unwrap();
