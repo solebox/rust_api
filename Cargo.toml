@@ -1,0 +1,17 @@
+[package]
+name = "hyperz"
+version = "0.1.0"
+authors = ["solebox <5013box@gmail.com>"]
+
+[[bin]]
+name="main"
+path="src/main.rs"
+
+[[example]]
+name="mongo"
+path="src/bin/mongo.rs"
+
+[dependencies]
+hyper = "0.10"
+bson = "0.6.1"
+mongodb = "*"
