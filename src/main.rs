@@ -36,7 +36,7 @@ fn main() {
 
                 let decoded_body: TestStruct = json::decode(&my_body).unwrap();
                 result.push_str(&my_body);
-                let my_decoded_body = format!("\n{}", decoded_body.token);
+                let my_decoded_body = format!("\ntoken:{}", decoded_body.token);
                 result.push_str(&my_decoded_body);
 
                 write!(&mut res.start().unwrap(),"{}",&result).unwrap();

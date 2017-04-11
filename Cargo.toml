@@ -11,8 +11,14 @@ path="src/main.rs"
 name="mongo"
 path="src/bin/mongo.rs"
 
+[[example]]
+name="crypto"
+path="src/bin/crypto.rs"
+
 [dependencies]
 hyper = "0.10"
 bson = "0.6.1"
 mongodb = "*"
 rustc-serialize = "0.3"
+rust-crypto="*"
+rand="*"
