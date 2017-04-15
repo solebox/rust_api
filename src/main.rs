@@ -1,10 +1,7 @@
 extern crate hyper;
 extern crate rustc_serialize;
 use rustc_serialize::json;
-use hyper::buffer::BufReader;
-use hyper::header::{Host, TransferEncoding, Encoding};
-use hyper::net::NetworkStream;
-use std::io::{self,Read, Write};
+use std::io::{Read, Write};
 use hyper::server::{Server, Request, Response};
 use hyper::status::StatusCode;
 
