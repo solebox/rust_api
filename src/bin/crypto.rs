@@ -104,14 +104,21 @@ fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symm
 
     Ok(final_result)
 }
-fn enc(msg: &String, key: &[u8; 32], iv: &[u8; 16]) -> String {
-    let encrypted_data = encrypt(msg.as_bytes(), key, iv).ok().unwrap();
-    let encryptush: String = encrypted_data.to_base64(base64::STANDARD);
+fn enc(msg: &String, key: &[u8; 32]) -> String {
+    let mut rng = OsRng::new().ok().unwrap();
+    let mut iv: [u8; 16] = [0; 16];
+    rng.fill_bytes(&mut iv);
+    let encrypted_data = encrypt(msg.as_bytes(), key, &iv).ok().unwrap();
+    let mut payload = encrypted_data.to_vec();
+    let mut appended = iv.to_vec();
+    payload.append(& mut appended);
+    let encryptush: String = payload.to_base64(base64::STANDARD);
     return encryptush
 }
-fn dec(msg: &String, key: &[u8; 32], iv: &[u8; 16]) -> String {
+fn dec(msg: &String, key: &[u8; 32]) -> String {
     let encrypted_data = msg.from_base64().unwrap();
-    let decrypted_data = decrypt(&encrypted_data[..], key, iv).ok().unwrap();
+    let iv2 = &encrypted_data[encrypted_data.len()-16..]; 
+    let decrypted_data = decrypt(&encrypted_data[0..encrypted_data.len()-16], key, iv2).ok().unwrap();
     let decryptush =  String::from_utf8(decrypted_data).unwrap();
     return decryptush
 }
@@ -120,7 +127,8 @@ fn main() {
     let message = "Hello World!";
 
     let mut key: [u8; 32] = [0; 32];
-    let mut iv: [u8; 16] = [0; 16];
+
+
 
     // In a real program, the key and iv may be determined
     // using some other mechanism. If a password is to be used
@@ -130,11 +138,10 @@ fn main() {
     // iv are just random values.
     let mut rng = OsRng::new().ok().unwrap();
     rng.fill_bytes(&mut key);
-    rng.fill_bytes(&mut iv);
 
 
-    let encryptush: String = enc(&message.to_string(), &key, &iv); 
-    let res = dec(&encryptush.to_string(), &key, &iv);
+    let encryptush: String = enc(&message.to_string(), &key); 
+    let res = dec(&encryptush.to_string(), &key);
     println!("{}", &encryptush);
     println!("{}", &res);
     assert!(message.as_bytes() == res.as_bytes());

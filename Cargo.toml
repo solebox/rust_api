@@ -15,6 +15,10 @@ path="src/bin/mongo.rs"
 name="crypto"
 path="src/bin/crypto.rs"
 
+[[example]]
+name="ctr"
+path="src/bin/ctrenc.rs"
+
 [dependencies]
 hyper = "0.10"
 bson = "0.6.1"
