@@ -104,7 +104,7 @@ fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symm
 
     Ok(final_result)
 }
-pub fn enc(msg: &String, key: &[u8; 32]) -> String {
+fn enc(msg: &String, key: &[u8; 32]) -> String {
     let mut rng = OsRng::new().ok().unwrap();
     let mut iv: [u8; 16] = [0; 16];
     rng.fill_bytes(&mut iv);
@@ -115,7 +115,7 @@ pub fn enc(msg: &String, key: &[u8; 32]) -> String {
     let encryptush: String = payload.to_base64(base64::STANDARD);
     return encryptush
 }
-pub fn dec(msg: &String, key: &[u8; 32]) -> String {
+fn dec(msg: &String, key: &[u8; 32]) -> String {
     let encrypted_data = msg.from_base64().unwrap();
     let iv2 = &encrypted_data[encrypted_data.len()-16..]; 
     let decrypted_data = decrypt(&encrypted_data[0..encrypted_data.len()-16], key, iv2).ok().unwrap();
