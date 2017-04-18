@@ -12,10 +12,6 @@ name="mongo"
 path="src/bin/mongo.rs"
 
 [[example]]
-name="crypto"
-path="src/bin/crypto.rs"
-
-[[example]]
 name="ctr"
 path="src/bin/ctrenc.rs"
 

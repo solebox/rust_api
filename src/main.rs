@@ -1,5 +1,8 @@
 extern crate hyper;
 extern crate rustc_serialize;
+extern crate hyperz;
+
+use hyperz::mein_libs::cryptoz::{enc, dec};
 use rustc_serialize::json;
 use std::io::{Read, Write};
 use hyper::server::{Server, Request, Response};
@@ -10,9 +13,13 @@ struct TestStruct {
     token: String,
     pass: String
 }
+
+
 fn main() {
 
+
     Server::http("0.0.0.0:8001").unwrap().handle(|mut req: Request, mut res: Response| {
+        let key = [149, 251, 204, 100, 110, 129, 252, 206, 71, 66, 193, 99, 43, 218, 49, 35, 199, 112, 22, 154, 126, 9, 226, 228, 49, 162, 243, 50, 1, 174, 207, 254];
         match req.method {
             hyper::Post => {
                 let mut result = "".to_string();
@@ -33,8 +40,14 @@ fn main() {
 
                 let decoded_body: TestStruct = json::decode(&my_body).unwrap();
                 result.push_str(&my_body);
-                let my_decoded_body = format!("\ntoken:{}", decoded_body.token);
+                let my_decoded_body = format!("\ntoken:{}\n", decoded_body.token);
+
                 result.push_str(&my_decoded_body);
+
+                let decrypted = dec(&decoded_body.token, &key);
+                let my_decrypted_token = format!("decrypted: {}", decrypted);
+
+                result.push_str(&my_decrypted_token);
 
                 write!(&mut res.start().unwrap(),"{}",&result).unwrap();
                 //io::copy(&mut req, &mut res.start().unwrap()).unwrap();
@@ -43,3 +56,30 @@ fn main() {
         }
     }).unwrap();
 }
+
+
+fn test_enc(){
+    let message = "Hello World!";
+
+   // let mut key: [u8; 32] = [0; 32];
+
+
+
+    // In a real program, the key and iv may be determined
+    // using some other mechanism. If a password is to be used
+    // as a key, an algorithm like PBKDF2, Bcrypt, or Scrypt (all
+    // supported by Rust-Crypto!) would be a good choice to derive
+    // a password. For the purposes of this example, the key and
+    // iv are just random values.
+
+    // cheating here a bit for science
+    let key = [149, 251, 204, 100, 110, 129, 252, 206, 71, 66, 193, 99, 43, 218, 49, 35, 199, 112, 22, 154, 126, 9, 226, 228, 49, 162, 243, 50, 1, 174, 207, 254];
+
+
+    let encryptush: String = enc(&message.to_string(), &key);
+    let res = dec(&encryptush.to_string(), &key);
+    println!("{}", &encryptush);
+    println!("{}", &res);
+    assert!(message.as_bytes() == res.as_bytes());
+}
+

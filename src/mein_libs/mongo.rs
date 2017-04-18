@@ -1,6 +1,4 @@
-#[macro_use(bson, doc)]
-extern crate bson;
-extern crate mongodb;
+
 
 use bson::Bson;
 use mongodb::{Client, ThreadedClient};
