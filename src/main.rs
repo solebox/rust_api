@@ -3,6 +3,7 @@ extern crate rustc_serialize;
 extern crate hyperz;
 
 use hyperz::mein_libs::cryptoz::{enc, dec};
+use hyperz::mein_libs::mongo::{insert_to_db};
 use rustc_serialize::json;
 use std::io::{Read, Write};
 use hyper::server::{Server, Request, Response};
@@ -14,13 +15,9 @@ struct TestStruct {
     pass: String
 }
 
-#[derive(RustcDecodable, RustcEncodable)]
-struct DecMessage {
-    service: String
-}
 
 fn main() {
-    //test_enc();
+    test_enc();
 
     Server::http("0.0.0.0:8001").unwrap().handle(|mut req: Request, mut res: Response| {
         let key = [149, 251, 204, 100, 110, 129, 252, 206, 71, 66, 193, 99, 43, 218, 49, 35, 199, 112, 22, 154, 126, 9, 226, 228, 49, 162, 243, 50, 1, 174, 207, 254];
@@ -69,13 +66,6 @@ fn main() {
     }).unwrap();
 }
 
-fn insert_to_db(decrypted_token: &String, remote_ip: &std::net::SocketAddr, request_data: &String) {
-    //implement insertion to mongodb
-    let decrypted_json_msg: DecMessage = json::decode(decrypted_token).unwrap();
-    println!("service: {}", decrypted_json_msg.service);
-    println!("remote_ip: {}", remote_ip);
-    println!("ver_headers_body: {}", request_data);
-}
 
 fn test_enc(){
     let message = "{\"service\": \"storm proxies\"}";
