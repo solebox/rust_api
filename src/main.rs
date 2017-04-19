@@ -68,7 +68,7 @@ fn main() {
 
 
 fn test_enc(){
-    let message = "{\"service\": \"storm proxies\"}";
+    let message = "{\"service\": \"dora the explorer\"}";
 
    // let mut key: [u8; 32] = [0; 32];
 
