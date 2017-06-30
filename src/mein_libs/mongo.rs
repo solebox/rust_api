@@ -6,20 +6,28 @@ use mongodb::db::ThreadedDatabase;
 use std;
 use rustc_serialize::json;
 
+
+
 #[derive(RustcDecodable, RustcEncodable)]
 struct DecMessage {
     service: String
 }
 
-pub fn insert_to_db(decrypted_token: &String, remote_ip: &std::net::SocketAddr, request_data: &String) {
+pub fn get_connection(host: String, port: u32) -> Client{
+    let client = Client::connect("localhost", 27017)
+        .expect("Failed to initialize standalone client.");
+    return client;
+}
+
+pub fn insert_to_db<'a>(client: &'a Client, decrypted_token: &String, remote_ip: &std::net::SocketAddr, request_data: &String) {
     //implement insertion to mongodb
     let decrypted_json_msg: DecMessage = json::decode(decrypted_token).unwrap();
     println!("service: {}", decrypted_json_msg.service);
     println!("remote_ip: {}", remote_ip);
     println!("ver_headers_body: {}", request_data);
 
-    let client = Client::connect("localhost", 27017)
-        .expect("Failed to initialize standalone client.");
+//    let client = Client::connect("localhost", 27017)
+//        .expect("Failed to initialize standalone client.");
 
     let coll = client.db("test").collection("services");
 
@@ -46,4 +54,5 @@ pub fn insert_to_db(decrypted_token: &String, remote_ip: &std::net::SocketAddr, 
         Some(Err(_)) => panic!("Failed to get next from server!"),
         None => panic!("Server returned no results!"),
     }
+
 }

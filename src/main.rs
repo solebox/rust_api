@@ -1,13 +1,20 @@
 extern crate hyper;
 extern crate rustc_serialize;
 extern crate hyperz;
+extern crate mongodb;
+extern crate bson;
 
 use hyperz::mein_libs::cryptoz::{enc, dec};
-use hyperz::mein_libs::mongo::{insert_to_db};
+use hyperz::mein_libs::mongo::{insert_to_db, get_connection};
 use rustc_serialize::json;
 use std::io::{Read, Write};
 use hyper::server::{Server, Request, Response};
 use hyper::status::StatusCode;
+use mongodb::{Client, ThreadedClient};
+
+use bson::Bson;
+
+use mongodb::db::ThreadedDatabase;
 
 #[derive(RustcDecodable, RustcEncodable)]
 struct TestStruct {
@@ -18,14 +25,15 @@ struct TestStruct {
 
 fn main() {
     test_enc();
-
+    let client = get_connection("localhost".to_string(), 27017);
     Server::http("0.0.0.0:8001").unwrap().handle(|mut req: Request, mut res: Response| {
         let key = [104, 101, 175, 217, 217, 34, 43, 150, 203, 235, 61, 161, 114, 41, 143, 106, 254, 248, 248, 77, 171, 127, 103, 194, 158, 98, 143, 144, 138, 157, 209, 173];
         match req.method {
             hyper::Post => {
+
                 let mut result = "".to_string();
 
-                let my_remote = format!("{}\n", req.remote_addr);
+                //let my_remote = format!("{}\n", req.remote_addr);
                 //result.push_str(&my_remote);
 
                 let my_version = format!("{}\n", req.version);
@@ -39,23 +47,21 @@ fn main() {
                     result.push_str(&my_headers);
                 }
 
-
-                
                 // body handling
                 let mut my_body = String::new();
                 let len = req.read_to_string(&mut my_body);
 
                 let decoded_body: TestStruct = json::decode(&my_body).unwrap();
                 result.push_str(&my_body);
-                let my_decoded_body = format!("\ntoken:{}\n", decoded_body.token);
+//                let my_decoded_body = format!("\ntoken:{}\n", decoded_body.token);
 
 //                result.push_str(&my_decoded_body);
 
                 let decrypted = dec(&decoded_body.token, &key);
-                let my_decrypted_token = format!("decrypted: {}", decrypted);
+//                let my_decrypted_token = format!("decrypted: {}", decrypted);
                 //result.push_str(&my_decrypted_token);
 
-                insert_to_db(&decrypted, &req.remote_addr, &result);
+                insert_to_db(&client, &decrypted, &req.remote_addr, &result);
 
                 let response = "wrong creds";
                 write!(&mut res.start().unwrap(),"{}",&response).unwrap();
@@ -82,7 +88,7 @@ fn test_enc(){
     // iv are just random values.
 
     // cheating here a bit for science
-    let key = [149, 251, 204, 100, 110, 129, 252, 206, 71, 66, 193, 99, 43, 218, 49, 35, 199, 112, 22, 154, 126, 9, 226, 228, 49, 162, 243, 50, 1, 174, 207, 254];
+    let key = [104, 101, 175, 217, 217, 34, 43, 150, 203, 235, 61, 161, 114, 41, 143, 106, 254, 248, 248, 77, 171, 127, 103, 194, 158, 98, 143, 144, 138, 157, 209, 173];
 
 
     let encryptush: String = enc(&message.to_string(), &key);
